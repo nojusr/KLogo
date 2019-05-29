@@ -10,15 +10,20 @@
 #define PROC_MAX_ARG_NAME_LENGTH 63
 #define PROC_MAX_AMOUNT 1000
 
-// error defs
+// programming error defs
 #define ERR_TYPE "Type Error"
 #define ERR_ARG "Argument Error"
 #define ERR_READ "Read Error"
 
+// used when throwing cli argument type errors
+#define ERR_TYPE_INT "Integer"
+#define ERR_TYPE_STRING "String"
+
+typedef int (*math_function)(int left, int right);
 
 struct math_primitive {
-    char *name;
-    void (*func)(int, int );// arguments
+    char *name[255];
+    math_function function;
 };
 
 
@@ -28,20 +33,24 @@ struct turtle {
     int direction; // 0 to 360
     int pen_width;
     
+    int pendown;
+    
+    
     int pencolor_R;
     int pencolor_G;
     int pencolor_B;
 };
 
+typedef void (*func)(int argc, int args[]);
 
 struct operation {
-    char *name;
+    char *name[255];
     int arg_count;
-    void (*func)(int,... );
+    func function;
 };
 
 struct procedure {
-    char *name;
+    char *name[255];
     int arg_count;
     int read_pos;
     
