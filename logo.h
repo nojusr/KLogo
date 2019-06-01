@@ -14,6 +14,7 @@
 #define ERR_TYPE "Type Error"
 #define ERR_ARG "Argument Error"
 #define ERR_READ "Read Error"
+#define ERR_SYNTAX "Syntax Error"
 
 // used when throwing cli argument type errors
 #define ERR_TYPE_INT "Integer"

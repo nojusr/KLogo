@@ -1,5 +1,6 @@
 # Makefile
 
-LDFLAGS=-lm
+LDFLAGS=-lm -g
+
 
 all:main

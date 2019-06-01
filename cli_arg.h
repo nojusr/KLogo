@@ -6,11 +6,6 @@
 #include "globals.h"
 #include "error.h"
 #include "logo.h"
-//safely gets next argument
-int get_next_arg(int num, char *argv[]){
-    
-    
-}
 
 int is_digit(char str[]){
     

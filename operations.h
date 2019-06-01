@@ -9,6 +9,11 @@
 #include "globals.h"
 #include "error.h"
 
+void turn_left(int argc, int args[]);
+void turn_right(int argc, int args[]);
+
+
+
 void op_print(int argc , int args[]){
 
     /* access all the arguments assigned to valist */
@@ -17,6 +22,41 @@ void op_print(int argc , int args[]){
     }
 
 }
+
+// turn counterclockwise
+void turn_left(int argc, int args[]){
+    
+    int deg = args[0];
+    
+    if (deg < 0){
+        args[0] *= -1;
+        turn_right(argc, args);
+    }
+    
+    main_turtle.direction -= deg;
+    while (main_turtle.direction < 0){
+        main_turtle.direction += 360;
+    }
+    
+    
+}
+
+// turn clockwise
+void turn_right(int argc, int args[]){
+    
+    int deg = args[0];
+    if (deg < 0){
+        args[0] *= -1;
+        turn_left(argc, args);
+    }
+    
+    main_turtle.direction += deg;
+    while (main_turtle.direction > 360){
+        main_turtle.direction -= 360;
+    }
+    
+}
+
 
 void movexy(int argc, int args[]){
 
@@ -28,9 +68,26 @@ void movexy(int argc, int args[]){
     
 }
 
+void penup(int argc, int args[]){
+    main_turtle.pendown = 0;
+}
+
+void pendown(int argc, int args[]){
+    main_turtle.pendown = 1;
+}
+
 void setheading (int argc, int args[]){
     
     int new_turtle_heading = args[0];
+    
+    while (new_turtle_heading > 360){
+        new_turtle_heading -= 360;
+    }
+    
+    while (new_turtle_heading < 0){
+        new_turtle_heading += 360;
+    }
+    
     
     main_turtle.direction = new_turtle_heading;
     
@@ -54,10 +111,12 @@ void forward (int argc, int args[]){
     int newy_int = (int) newy;
     
     //TODO CHECK FOR OUT OF BOUNDS
-    main_turtle.x = newx_int;
-    main_turtle.y = newy_int;
+    main_turtle.x = main_turtle.x + newx_int;
+    main_turtle.y = main_turtle.y + newy_int;
     
 }
+
+
 
 void backward(int argc, int args[]){
     double dist = (double)args[0];
@@ -71,8 +130,8 @@ void backward(int argc, int args[]){
     int newy_int = (int) newy;
     
     //TODO CHECK FOR OUT OF BOUNDS
-    main_turtle.x = newx_int;
-    main_turtle.y = newy_int;
+    main_turtle.x = main_turtle.x + newx_int;
+    main_turtle.y = main_turtle.y + newy_int;
 }
 
 #endif
