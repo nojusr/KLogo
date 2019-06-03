@@ -18,7 +18,7 @@ void op_print(int argc , int args[]){
 
     /* access all the arguments assigned to valist */
     for (int i = 0; i < argc; i++) {
-        printf("%i ", args[i]);
+        printf("%i\n", args[i]);
     }
 
 }

@@ -12,7 +12,8 @@ int loop_around_window = 1;
 // filename to read
 char filename[255] = "null";
 
-
 struct turtle main_turtle;
+
+
 
 #endif

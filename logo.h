@@ -23,7 +23,7 @@
 typedef int (*math_function)(int left, int right);
 
 struct math_primitive {
-    char *name[255];
+    char name;
     math_function function;
 };
 
