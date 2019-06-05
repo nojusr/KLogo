@@ -75,6 +75,16 @@ void print_turtle_dbg(){
 // 4. execute it like normal
 // 5. fseek to provided original position
 
+//on the variable filling out part:
+//1. make it a seperate function that takes in: 
+//  a)the string of the whole function
+//  b)an array of structs that has: the variable name, the variable's value
+//2. definition of what the function does:
+//  a)looks for a char that starts with :
+//  b)reads forward(while outputting into a string), until it encounters a non-alpha char (any symbol or number)
+//  c)finds the argument's value
+//  d)replaces it (mind you it was outputting into a buffer string all along)
+//  e)continues reading 
 
 
 void init_global_turtle(){
