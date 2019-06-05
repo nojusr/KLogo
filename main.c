@@ -28,7 +28,7 @@ struct operation ops[] = {
     {.name = "right", .arg_count = 1, .function = turn_right},
     {.name = "penup", .arg_count = 0, .function = penup},
     {.name = "pendown", .arg_count = 0, .function = pendown},
-    {.name = "setw", .arg_count = 0, .function = pendown},
+    {.name = "setw", .arg_count = 1, .function = set_pen_width},
 
 };
 
@@ -52,6 +52,30 @@ void print_turtle_dbg(){
     }
 
 }
+
+//how to parse procedures:
+//read through whole file seperately
+//ignore everything between brackets
+//upon finding a 'to' symbol:
+// read every next word, as long as it's first char is ':'
+// upon finding a word that doesn't start with ':'
+// get ftell, and put all of the data found (var names, starting position, var count);
+// from this point on, procedures should all be parsed.
+
+//how to run procedures:
+//upon finding a word that isn't a function defined in ops[]
+//look for it in the procedures[] struct, if none found, throw a 'not found error'
+//if found, get it's arg count, read expressions for the amount of arguments provided
+//after reading in all expressions, get ftell, and pass the current, the procedures name, and the parsed expressions
+// (as integers) to a function
+// said function will:
+// 1. find the position of the procedure in the file
+// 2. fseek to said position
+// 3. fill out any variables found and provided
+// 4. execute it like normal
+// 5. fseek to provided original position
+
+
 
 void init_global_turtle(){
     main_turtle.x = screen_width/2;
@@ -508,6 +532,10 @@ int main(int argc, char *argv[]){
     FILE *main_file;
 
     main_file = fopen(filename, "r");
+
+    if (main_file == NULL){
+        throw_fatal_error(ERR_ARG, "Error opening file.");
+    }
 
     for (;;){
 
