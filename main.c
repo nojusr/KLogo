@@ -10,7 +10,7 @@
 #include "cli_arg.h"
 #include "math_primitive.h"
 
-#define DEBUG 0
+#define DEBUG 1
 
 
 struct operation ops[] = {
@@ -218,7 +218,16 @@ void parse_parentheses(char input[]){
                 char seperated_str[1024] = {0};
                 strncpy(seperated_str, input+starting_point+1, i - starting_point-1);
 
+                if (DEBUG == 1){
+                    printf("recursing expr in parentheses: %s\n", seperated_str);
+                }
+
                 int output = parse_math_expression(seperated_str);//recursion happens here
+                
+                if (DEBUG == 1){
+                    printf("got output: %d\n", output);
+                }
+                
                 sprintf(buffer+strlen(buffer), "%d", output);
             }
 
@@ -452,10 +461,15 @@ void parse_next_word(int op_count, FILE *main_file, int main_scope){
         fscanf(main_file, "%*c");//burn off residue chars
         expr[strlen(expr)+1] = '\0';
         if (DEBUG == 1){
+            printf("===========================================\n");
             printf("expression found: %s\n", expr);
         }
         int buf = parse_math_expression(expr);
-
+        
+        if (DEBUG == 1){
+            printf("===========================================\n");
+        }
+        
 
         op_args[i] = buf;
     }
