@@ -134,4 +134,12 @@ void backward(int argc, int args[]){
     main_turtle.y = main_turtle.y + newy_int;
 }
 
+void set_pen_width(int argc, int args[]){
+    int new_width = args[0];
+    main_turtle.pen_width = new_width;
+    
+    
+    
+}
+
 #endif

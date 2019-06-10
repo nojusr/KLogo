@@ -50,12 +50,16 @@ struct operation {
     func function;
 };
 
+
 struct procedure {
     char *name[255];
     int arg_count;
-    int read_pos;
+    char var_names[255][255];
+    long position;
     
 };
+
+
 
 #endif 
 

@@ -41,6 +41,8 @@ struct math_primitive mathops[] = {
     {.name = '%', .function = mod}
 };
 
+struct procedure procedures[255];
+int proc_count;
 
 void print_turtle_dbg(){
     if (DEBUG == 1){
@@ -53,38 +55,7 @@ void print_turtle_dbg(){
 
 }
 
-//how to parse procedures:
-//read through whole file seperately
-//ignore everything between brackets
-//upon finding a 'to' symbol:
-// read every next word, as long as it's first char is ':'
-// upon finding a word that doesn't start with ':'
-// get ftell, and put all of the data found (var names, starting position, var count);
-// from this point on, procedures should all be parsed.
 
-//how to run procedures:
-//upon finding a word that isn't a function defined in ops[]
-//look for it in the procedures[] struct, if none found, throw a 'not found error'
-//if found, get it's arg count, read expressions for the amount of arguments provided
-//after reading in all expressions, get ftell, and pass the current, the procedures name, and the parsed expressions
-// (as integers) to a function
-// said function will:
-// 1. find the position of the procedure in the file
-// 2. fseek to said position
-// 3. fill out any variables found and provided
-// 4. execute it like normal
-// 5. fseek to provided original position
-
-//on the variable filling out part:
-//1. make it a seperate function that takes in: 
-//  a)the string of the whole function
-//  b)an array of structs that has: the variable name, the variable's value
-//2. definition of what the function does:
-//  a)looks for a char that starts with :
-//  b)reads forward(while outputting into a string), until it encounters a non-alpha char (any symbol or number)
-//  c)finds the argument's value
-//  d)replaces it (mind you it was outputting into a buffer string all along)
-//  e)continues reading 
 
 
 void init_global_turtle(){
@@ -103,6 +74,151 @@ void init_global_turtle(){
 
 }
 
+//how to parse procedures:
+//read through whole file seperately
+//ignore everything between brackets
+//upon finding a 'to' symbol:
+// read every next word, as long as it's first char is ':'
+// upon finding a word that doesn't start with ':'
+// get ftell, and put all of the data found (var names, starting position, var count);
+// from this point on, procedures should all be parsed.
+
+//how to run procedures:
+//upon finding a word that isn't a function defined in ops[]
+//look for it in the procedures[] struct, if none found, throw a 'not found error'
+//if found, get it's arg count, read expressions for the amount of arguments provided
+//after reading in all expressions, get ftell, and pass the current pos, the procedures name, and the parsed expressions
+// (as integers) to a function
+// said function will:
+// 1. find the position of the procedure in the file
+// 2. fseek to said position
+// 3. fill out any variables found and provided
+// 4. execute it like normal
+// 5. fseek to provided original position
+
+//on the variable filling out part:
+//1. make it a seperate function that takes in: 
+//  a)the string of the whole function
+//  b)an array of structs that has: the variable name, the variable's value
+//2. definition of what the function does:
+//  a)looks for a word that starts with :
+//  b)reads forward(while outputting into a string), until it encounters a non-alpha char (any symbol or number)
+//  c)finds the argument's value
+//  d)replaces it (mind you it was outputting into a buffer string all along)
+//  e)continues reading 
+
+
+void dbg_print_procedures(){
+    if (DEBUG == 1){
+        printf("all found procedures:\n");
+        for (int i = 0; i < proc_count; i++){
+            struct procedure tmp = procedures[i];
+            printf("procedure name: %s\n", tmp.name);
+            printf("procedure position in file: %d\n", tmp.position);
+            printf("procedure argcount: %d\n", tmp.arg_count);
+            
+            printf("arg names: ");
+            for (int j = 0; j < tmp.arg_count; j++){
+                printf("%s, ", tmp.var_names[j]);
+            }
+            printf("\n");
+            
+            
+            
+        }
+    }
+}
+
+
+void parse_procedures(){
+    
+    FILE *procedure_stream;
+
+    procedure_stream = fopen(filename, "r");
+    
+    if (procedure_stream == NULL){
+        throw_fatal_error(ERR_ARG, "Error opening file.");
+    }
+    
+    char word[255];
+    char buf;
+    
+    int is_in_func = 0;
+    int is_in_brackets = 0;
+    
+    for (;;){
+
+        fscanf(procedure_stream, "%s", word);
+        
+        if (strcmp(word, "[") == 0 || word[0] == '['){
+            
+            is_in_brackets = 1;
+            
+        }
+        
+        
+        if (strcmp(word, "to") == 0){
+            
+            if (is_in_func == 1){
+                throw_fatal_error(ERR_SYNTAX, "procedures cannot be defined inside other procedures");
+            }
+            if (is_in_brackets == 1){
+                throw_fatal_error(ERR_SYNTAX, "procedures cannot be defined inside loops or if statements");
+            }
+            
+            is_in_func = 1;
+            
+            struct procedure new_proc;
+            new_proc.name[0] = '\0';
+            new_proc.arg_count = 0;
+            fscanf(procedure_stream, "%s", new_proc.name);
+            
+            printf("NEW_PROCEDURE: %s\n", new_proc.name);
+            
+            for (;;){
+                
+                fscanf(procedure_stream, "%s", word);
+                printf("scanning for args: %s\n", word);
+                if (word[0] == ':'){
+                    printf("ARG FOUND\n");
+                    strcpy(new_proc.var_names[new_proc.arg_count], word);
+                    new_proc.arg_count++;
+                } else{
+                    
+                    new_proc.position = ftell(procedure_stream);
+                    break;
+                }
+            }
+            //procedures[proc_count] = new_proc;
+            
+            memcpy(&procedures[proc_count], &new_proc, sizeof new_proc);
+            proc_count++;
+            
+        }
+        
+        if (strcmp(word, "end") == 0){
+            is_in_func = 0;
+        }
+        if (strcmp(word, "]") == 0 || word[strlen(word)-1] == ']'){
+            is_in_brackets = 0;
+        }
+        
+        if (feof(procedure_stream)){
+            if (is_in_func == 1){
+                throw_fatal_error(ERR_SYNTAX, "Unexpected EOF in procedure definition");
+            }
+            
+            if (is_in_brackets == 1){
+                throw_fatal_error(ERR_SYNTAX, "Unexpected EOF in loop or if statement");
+            }
+            
+            
+            break;
+        }
+        
+    }
+    
+}
 
 
 // can only take in basic number args, expressions have to be processed in other funcs
@@ -207,7 +323,6 @@ void remove_whitespace(char input[]){
     char no_whitespace[1024];
     int nwlen = 0;
 
-    //remove all whitespace
     for (int i = 0; i < strlen(input); i++){
         if (isspace(input[i])){
             continue;
@@ -434,7 +549,7 @@ void parse_next_word(int op_count, FILE *main_file, int main_scope){
 
     fscanf(main_file, "%s", word);
 
-    if (word[0] == '#'){// comment handling (comments will work until new line)
+    while (word[0] == '#'){// comment handling (comments will work until new line)
         char buf;
         for (;;){
             buf = fgetc(main_file);
@@ -446,10 +561,13 @@ void parse_next_word(int op_count, FILE *main_file, int main_scope){
     }
 
 
-    if (strcmp(word, "to") == 0){// ignore all functions (for now)
+    while (strcmp(word, "to") == 0){// ignore all functions (for now)
+        printf("FUNCTION DETECT IN MAIN PARSE\n");
         for (;;){
             fscanf(main_file, "%s", word);
+            printf("scanning forward: %s\n", word);
             if (strcmp(word, "end") == 0){
+                printf("'end' detected, breaking\n");
                 fscanf(main_file, "%s", word);
                 break;
             }
@@ -546,6 +664,8 @@ int main(int argc, char *argv[]){
     if (main_file == NULL){
         throw_fatal_error(ERR_ARG, "Error opening file.");
     }
+    parse_procedures();
+    dbg_print_procedures();
 
     for (;;){
 
